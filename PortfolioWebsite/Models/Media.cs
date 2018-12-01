@@ -41,8 +41,8 @@ namespace PortfolioWebsite.Models
         [Required]
         public bool Hidden { get; set; }
 
+        [ForeignKey("Work")]
         public int WorkID { get; set; }
-        [ForeignKey("WorkID")]
-        public Media Work { get; set; }
+        public Work Work { get; set; }
     }
 }

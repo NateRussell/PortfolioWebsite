@@ -27,11 +27,11 @@ namespace PortfolioWebsite.Models
 
         public string Tags { get; set; }
 
+        [ForeignKey("User")]
         public string UserID { get; set; }
-        [ForeignKey("UserID")]
         public User User { get; set; }
 
-        public List<Media> Media { get; set; }
-        public List<Comment> Comments { get; set; }
+        public IList<Media> Media { get; set; }
+        public IList<Comment> Comments { get; set; }
     }
 }

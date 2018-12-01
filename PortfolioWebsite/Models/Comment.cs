@@ -10,12 +10,12 @@ namespace PortfolioWebsite.Models
     {
         public int ID { get; set; }
 
+        [ForeignKey("Work")]
         public int WorkID { get; set; }
-        [ForeignKey("WorkID")]
-        public Media Work { get; set; }
+        public Work Work { get; set; }
 
+        [ForeignKey("User")]
         public string UserID { get; set; }
-        [ForeignKey("UserID")]
         public User User { get; set; }
     }
 }

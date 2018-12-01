@@ -11,7 +11,7 @@ namespace PortfolioWebsite.Models
     {
         [Required]
         public bool OptIn { get; set; }
-        public List<Comment> Comments { get; set; }
-        public List<Work> Works { get; set; }
+        public IList<Comment> Comments { get; set; }
+        public IList<Work> Works { get; set; }
     }
 }
