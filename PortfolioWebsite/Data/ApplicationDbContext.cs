@@ -15,5 +15,7 @@ namespace PortfolioWebsite.Data
         }
 
         public virtual DbSet<User> User { get; set; }
+
+        public DbSet<PortfolioWebsite.Models.Work> Work { get; set; }
     }
 }
