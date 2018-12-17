@@ -195,6 +195,10 @@ namespace PortfolioWebsite.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000);
+
                     b.Property<string>("UserID");
 
                     b.Property<int>("WorkID");

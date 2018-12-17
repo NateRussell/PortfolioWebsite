@@ -10,7 +10,7 @@ using PortfolioWebsite.Models;
 
 namespace PortfolioWebsite.Controllers
 {
-    public class WorksController : Controller
+    public class WorksController : AppController
     {
         private readonly ApplicationDbContext _context;
 
@@ -36,12 +36,13 @@ namespace PortfolioWebsite.Controllers
 
             var work = await _context.Work
                 .Include(w => w.User)
+                .Include(w => w.Comments)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (work == null)
             {
                 return NotFound();
             }
-
+            ViewData["UserID"] = GetUserID();
             return View(work);
         }
 

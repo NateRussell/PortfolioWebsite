@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+
+@model IEnumerable<PortfolioWebsite.Models.Comment>
+
+@{
+    var commentCount = 0;
+    if (Model != null)
+    {
+        commentCount = Model.Count();
+    }
+
+}
+<h2>Comments (@commentCount) </h2>
+@if (User.Identity.IsAuthenticated && ViewData.Keys.Contains("WorkID")) //Add Authorization
+{
+    @await Html.PartialAsync("/Views/Comments/_Create.cshtml", new Comment())
+}
+@if (commentCount > 0)
+{
+    @await Html.PartialAsync("/Views/Comments/_Index.cshtml", Model)
+}

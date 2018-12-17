@@ -10,7 +10,7 @@ using PortfolioWebsite.Data;
 namespace PortfolioWebsite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20181201184735_Initial")]
+    [Migration("20181210033417_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -196,6 +196,10 @@ namespace PortfolioWebsite.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000);
 
                     b.Property<string>("UserID");
 

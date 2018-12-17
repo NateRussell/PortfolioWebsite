@@ -13,7 +13,15 @@ namespace PortfolioWebsite.Data
             : base(options)
         {
         }
-
+        /*
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Work>()
+                .HasMany(p => p.Comments)
+                .WithOne(b => b.Work);
+            base.OnModelCreating(modelBuilder);
+        }
+        */
         public virtual DbSet<User> User { get; set; }
 
         public DbSet<PortfolioWebsite.Models.Work> Work { get; set; }

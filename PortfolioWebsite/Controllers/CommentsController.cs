@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +12,7 @@ using PortfolioWebsite.Models;
 
 namespace PortfolioWebsite.Controllers
 {
-    public class CommentsController : Controller
+    public class CommentsController : AppController
     {
         private readonly ApplicationDbContext _context;
 
@@ -20,38 +22,13 @@ namespace PortfolioWebsite.Controllers
         }
 
         // GET: Comments
+        [Authorize]
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Comment.Include(c => c.User).Include(c => c.Work);
+            string userID = GetUserID();
+            var applicationDbContext = _context.Comment.Where(c => c.UserID == userID).Include(c => c.User).Include(c => c.Work);
+            ViewData["UserID"] = userID;
             return View(await applicationDbContext.ToListAsync());
-        }
-
-        // GET: Comments/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var comment = await _context.Comment
-                .Include(c => c.User)
-                .Include(c => c.Work)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            return View(comment);
-        }
-
-        // GET: Comments/Create
-        public IActionResult Create()
-        {
-            ViewData["UserID"] = new SelectList(_context.User, "Id", "Id");
-            ViewData["WorkID"] = new SelectList(_context.Work, "ID", "Description");
-            return View();
         }
 
         // POST: Comments/Create
@@ -59,20 +36,28 @@ namespace PortfolioWebsite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,WorkID,UserID")] Comment comment)
+        [Authorize]
+        public async Task<IActionResult> Create([Bind("ID,Text,WorkID")] Comment comment)
         {
+            string userID = GetUserID();
+            if (userID != "")
+            {
+                ModelState.Clear();
+                comment.UserID = userID;
+                TryValidateModel(comment);
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(comment);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
             }
-            ViewData["UserID"] = new SelectList(_context.User, "Id", "Id", comment.UserID);
-            ViewData["WorkID"] = new SelectList(_context.Work, "ID", "Description", comment.WorkID);
-            return View(comment);
+            return BadRequest(ModelState);
         }
 
         // GET: Comments/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -85,9 +70,15 @@ namespace PortfolioWebsite.Controllers
             {
                 return NotFound();
             }
-            ViewData["UserID"] = new SelectList(_context.User, "Id", "Id", comment.UserID);
-            ViewData["WorkID"] = new SelectList(_context.Work, "ID", "Description", comment.WorkID);
-            return View(comment);
+
+            if (IsValidEditor(comment))
+            {
+                return View(comment);
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         // POST: Comments/Edit/5
@@ -95,11 +86,23 @@ namespace PortfolioWebsite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,WorkID,UserID")] Comment comment)
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, string Text)
         {
-            if (id != comment.ID)
+            var comment = await _context.Comment.FindAsync(id);
+            if (comment == null)
             {
                 return NotFound();
+            }
+
+            if (IsValidEditor(comment))
+            {
+                comment.Text = Text;
+                TryValidateModel(comment);
+            }
+            else
+            {
+                Unauthorized();
             }
 
             if (ModelState.IsValid)
@@ -120,10 +123,8 @@ namespace PortfolioWebsite.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
             }
-            ViewData["UserID"] = new SelectList(_context.User, "Id", "Id", comment.UserID);
-            ViewData["WorkID"] = new SelectList(_context.Work, "ID", "Description", comment.WorkID);
             return View(comment);
         }
 
@@ -135,32 +136,54 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            var comment = await _context.Comment
-                .Include(c => c.User)
-                .Include(c => c.Work)
-                .FirstOrDefaultAsync(m => m.ID == id);
+            var comment = await _context.Comment.FindAsync(id);
             if (comment == null)
             {
                 return NotFound();
             }
 
-            return View(comment);
+            if (IsValidEditor(comment))
+            {
+                return View(comment);
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var comment = await _context.Comment.FindAsync(id);
-            _context.Comment.Remove(comment);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            if (IsValidEditor(comment))
+            {
+                _context.Comment.Remove(comment);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         private bool CommentExists(int id)
         {
             return _context.Comment.Any(e => e.ID == id);
+        }
+
+        private bool IsValidEditor(Comment comment)
+        {
+            return GetUserID() == comment.UserID;
         }
     }
 }

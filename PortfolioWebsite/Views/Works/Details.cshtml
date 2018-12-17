@@ -48,7 +48,13 @@
         </dd>
     </dl>
 </div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+@*<h1>@Model.Comments.Count()</h1>*@
+@await Html.PartialAsync("_Comments", Model.Comments, new ViewDataDictionary(ViewData)
+                            {
+                                { "WorkID", Model.ID }
+                            })

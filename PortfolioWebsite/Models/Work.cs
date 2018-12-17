@@ -32,6 +32,7 @@ namespace PortfolioWebsite.Models
         public User User { get; set; }
 
         public IList<Media> Media { get; set; }
+
         public IList<Comment> Comments { get; set; }
     }
 }
