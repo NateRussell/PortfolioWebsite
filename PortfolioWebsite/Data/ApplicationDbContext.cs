@@ -22,7 +22,7 @@ namespace PortfolioWebsite.Data
             base.OnModelCreating(modelBuilder);
         }
         */
-        public virtual DbSet<User> User { get; set; }
+        public virtual DbSet<AppUser> User { get; set; }
 
         public DbSet<PortfolioWebsite.Models.Work> Work { get; set; }
 

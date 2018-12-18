@@ -26,6 +26,6 @@ namespace PortfolioWebsite.Models
         [HiddenInput]
         [ForeignKey("User")]
         public string UserID { get; set; }
-        public User User { get; set; }
+        public AppUser User { get; set; }
     }
 }

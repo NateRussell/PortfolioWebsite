@@ -187,7 +187,7 @@ namespace PortfolioWebsite.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Text = table.Column<string>(maxLength: 1000, nullable: false),
                     WorkID = table.Column<int>(nullable: false),
-                    UserID = table.Column<string>(nullable: true)
+                    UserID = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -197,7 +197,7 @@ namespace PortfolioWebsite.Migrations
                         column: x => x.UserID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Comment_Work_WorkID",
                         column: x => x.WorkID,

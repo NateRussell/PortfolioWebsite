@@ -1,8 +1,8 @@
 @using Microsoft.AspNetCore.Identity
 @using PortfolioWebsite.Data;
 
-@inject SignInManager<User> SignInManager
-@inject UserManager<User> UserManager
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
 
 @if (SignInManager.IsSignedIn(User))
 {

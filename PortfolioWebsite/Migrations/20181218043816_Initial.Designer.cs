@@ -10,7 +10,7 @@ using PortfolioWebsite.Data;
 namespace PortfolioWebsite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20181210033417_Initial")]
+    [Migration("20181218043816_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -201,7 +201,8 @@ namespace PortfolioWebsite.Migrations
                         .IsRequired()
                         .HasMaxLength(1000);
 
-                    b.Property<string>("UserID");
+                    b.Property<string>("UserID")
+                        .IsRequired();
 
                     b.Property<int>("WorkID");
 
@@ -284,15 +285,15 @@ namespace PortfolioWebsite.Migrations
                     b.ToTable("Work");
                 });
 
-            modelBuilder.Entity("PortfolioWebsite.Models.User", b =>
+            modelBuilder.Entity("PortfolioWebsite.Models.AppUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
                     b.Property<bool>("OptIn");
 
-                    b.ToTable("User");
+                    b.ToTable("AppUser");
 
-                    b.HasDiscriminator().HasValue("User");
+                    b.HasDiscriminator().HasValue("AppUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -342,9 +343,10 @@ namespace PortfolioWebsite.Migrations
 
             modelBuilder.Entity("PortfolioWebsite.Models.Comment", b =>
                 {
-                    b.HasOne("PortfolioWebsite.Models.User", "User")
+                    b.HasOne("PortfolioWebsite.Models.AppUser", "User")
                         .WithMany("Comments")
-                        .HasForeignKey("UserID");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("PortfolioWebsite.Models.Work", "Work")
                         .WithMany("Comments")
@@ -362,7 +364,7 @@ namespace PortfolioWebsite.Migrations
 
             modelBuilder.Entity("PortfolioWebsite.Models.Work", b =>
                 {
-                    b.HasOne("PortfolioWebsite.Models.User", "User")
+                    b.HasOne("PortfolioWebsite.Models.AppUser", "User")
                         .WithMany("Works")
                         .HasForeignKey("UserID");
                 });

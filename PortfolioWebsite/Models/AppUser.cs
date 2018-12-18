@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace PortfolioWebsite.Models
 {
-    public class User : IdentityUser
+    public class AppUser : IdentityUser
     {
         [Required]
         public bool OptIn { get; set; }

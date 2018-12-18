@@ -1,6 +1,6 @@
 ﻿@using PortfolioWebsite.Models;
 
-@inject SignInManager<User> SignInManager
+@inject SignInManager<AppUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
