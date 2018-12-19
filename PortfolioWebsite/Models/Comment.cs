@@ -16,6 +16,12 @@ namespace PortfolioWebsite.Models
         [StringLength(1000)]
         public string Text { get; set; }
 
+        public bool Deleted { get; set; } = false;
+        public bool Edited { get; set; } = false;
+
+        public DateTime CreateDate { get; set; } = DateTime.UtcNow;
+        public DateTime EditDate { get; set; }
+
         [Required]
         [HiddenInput]
         [ForeignKey("Work")]

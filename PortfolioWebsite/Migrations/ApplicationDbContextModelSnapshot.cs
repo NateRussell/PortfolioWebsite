@@ -195,6 +195,14 @@ namespace PortfolioWebsite.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime>("CreateDate");
+
+                    b.Property<bool>("Deleted");
+
+                    b.Property<DateTime>("EditDate");
+
+                    b.Property<bool>("Edited");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(1000);

@@ -98,6 +98,8 @@ namespace PortfolioWebsite.Controllers
             if (IsValidEditor(comment))
             {
                 comment.Text = Text;
+                comment.Edited = true;
+                comment.EditDate = DateTime.UtcNow;
                 TryValidateModel(comment);
             }
             else
@@ -166,14 +168,36 @@ namespace PortfolioWebsite.Controllers
 
             if (IsValidEditor(comment))
             {
-                _context.Comment.Remove(comment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+                comment.Deleted = true;
+                TryValidateModel(comment);
             }
             else
             {
                 return Unauthorized();
             }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(comment);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!CommentExists(comment.ID))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+            }
+            return BadRequest();
+
         }
 
         private bool CommentExists(int id)

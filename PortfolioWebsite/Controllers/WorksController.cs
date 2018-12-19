@@ -37,6 +37,7 @@ namespace PortfolioWebsite.Controllers
             var work = await _context.Work
                 .Include(w => w.User)
                 .Include(w => w.Comments)
+                .ThenInclude(c => c.User)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (work == null)
             {

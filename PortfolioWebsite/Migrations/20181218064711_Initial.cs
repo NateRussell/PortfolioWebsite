@@ -186,6 +186,10 @@ namespace PortfolioWebsite.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Text = table.Column<string>(maxLength: 1000, nullable: false),
+                    Deleted = table.Column<bool>(nullable: false),
+                    Edited = table.Column<bool>(nullable: false),
+                    CreateDate = table.Column<DateTime>(nullable: false),
+                    EditDate = table.Column<DateTime>(nullable: false),
                     WorkID = table.Column<int>(nullable: false),
                     UserID = table.Column<string>(nullable: false)
                 },
