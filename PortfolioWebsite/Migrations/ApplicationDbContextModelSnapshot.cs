@@ -203,6 +203,8 @@ namespace PortfolioWebsite.Migrations
 
                     b.Property<bool>("Edited");
 
+                    b.Property<int?>("ParentID");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(1000);
@@ -213,6 +215,8 @@ namespace PortfolioWebsite.Migrations
                     b.Property<int>("WorkID");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ParentID");
 
                     b.HasIndex("UserID");
 
@@ -349,6 +353,11 @@ namespace PortfolioWebsite.Migrations
 
             modelBuilder.Entity("PortfolioWebsite.Models.Comment", b =>
                 {
+                    b.HasOne("PortfolioWebsite.Models.Comment", "Parent")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("PortfolioWebsite.Models.AppUser", "User")
                         .WithMany("Comments")
                         .HasForeignKey("UserID")

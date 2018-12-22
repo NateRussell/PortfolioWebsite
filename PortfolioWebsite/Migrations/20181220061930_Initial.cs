@@ -190,12 +190,19 @@ namespace PortfolioWebsite.Migrations
                     Edited = table.Column<bool>(nullable: false),
                     CreateDate = table.Column<DateTime>(nullable: false),
                     EditDate = table.Column<DateTime>(nullable: false),
+                    ParentID = table.Column<int>(nullable: true),
                     WorkID = table.Column<int>(nullable: false),
                     UserID = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Comment", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Comment_Comment_ParentID",
+                        column: x => x.ParentID,
+                        principalTable: "Comment",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Comment_AspNetUsers_UserID",
                         column: x => x.UserID,
@@ -275,6 +282,11 @@ namespace PortfolioWebsite.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comment_ParentID",
+                table: "Comment",
+                column: "ParentID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comment_UserID",

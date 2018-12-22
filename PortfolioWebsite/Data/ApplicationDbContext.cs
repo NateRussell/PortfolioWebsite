@@ -13,15 +13,22 @@ namespace PortfolioWebsite.Data
             : base(options)
         {
         }
-        /*
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Work>()
-                .HasMany(p => p.Comments)
-                .WithOne(b => b.Work);
             base.OnModelCreating(modelBuilder);
+            /*
+            modelBuilder.Entity<Comment>()
+                .Property(c => c.ID)
+                .ValueGeneratedOnAdd();
+                */
+            modelBuilder.Entity<Comment>()
+                .HasMany(p => p.Replies)
+                .WithOne(b => b.Parent)
+                .HasForeignKey("ParentID")
+                .OnDelete(DeleteBehavior.Restrict);
         }
-        */
+        
         public virtual DbSet<AppUser> User { get; set; }
 
         public DbSet<PortfolioWebsite.Models.Work> Work { get; set; }

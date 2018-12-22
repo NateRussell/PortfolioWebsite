@@ -10,6 +10,8 @@ namespace PortfolioWebsite.Models
 {
     public class Comment
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         [Required]
@@ -21,6 +23,13 @@ namespace PortfolioWebsite.Models
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow;
         public DateTime EditDate { get; set; }
+
+        public IList<Comment> Replies { get; set; }
+
+        [HiddenInput]
+        [ForeignKey("ParentID")]
+        public int? ParentID { get; set; } = null;
+        public Comment Parent { get; set; }
 
         [Required]
         [HiddenInput]

@@ -1,43 +1,74 @@
 ﻿@using System.Security.Claims
 @model IEnumerable<PortfolioWebsite.Models.Comment>
 
-<div class="comments">
+<ul class="comments">
     @foreach (var item in Model.Reverse())
     {
-    <div class="comment">
-        @if (!ViewData.Keys.Contains("WorkID"))
+        @*Filter which comments are shown based on the parent comment and the currect level of recursion.*@
+        if ((!ViewData.Keys.Contains("ParentID") && item.ParentID == null) || (ViewData.Keys.Contains("ParentID") && item.ParentID.ToString() == ViewData["ParentID"].ToString()))
         {
-            <a asp-controller="Works" asp-action="Details" asp-route-id="@item.Work.ID">@Html.DisplayFor(modelItem => item.Work.Title)</a>
-        }
-            <h5>
-                @Html.DisplayFor(modelItem => item.User.UserName)
-                @if (item.Edited && !item.Deleted)
+            @*Create view data that will be used for creating and displaying replies*@
+            var replyData = new ViewDataDictionary(ViewData);
+            if (replyData.Keys.Contains("ParentID"))
+            {
+                replyData["ParentID"] = item.ID;
+            }
+            else
+            {
+                replyData.Add("ParentID", item.ID);
+            }
+
+            <li class="comment">
+                @*If you weren't viewing the comment as part of a work, show a link to the work that it was posted to.*@
+                @if (!ViewData.Keys.Contains("WorkID"))
                 {
-                    @:- EDITED @Html.DisplayFor(modelItem => item.EditDate) UTC
+                    <a asp-controller="Works" asp-action="Details" asp-route-id="@item.Work.ID">@Html.DisplayFor(modelItem => item.Work.Title)</a>
+                }
+
+                @*Show the text of the comment unless it has been deleted.*@
+                @if (item.Deleted)
+                {
+                    <p>[removed]</p>
                 }
                 else
                 {
-                    @:- CREATED @Html.DisplayFor(modelItem => item.CreateDate) UTC
+                    <p>@Html.DisplayFor(modelItem => item.Text)</p>
                 }
-            </h5>
-        @if (item.Deleted)
-        {
-            <p>[removed]</p>
-        }
-        else
-        {
-            <p>@Html.DisplayFor(modelItem => item.Text)</p>
-        }
 
-        @if (ViewData.Keys.Contains("UserID") && ViewData["UserID"].ToString() == item.UserID)
-        {
-            @if (!item.Deleted)
-            {
-                <a asp-controller="Comments" asp-action="Edit" asp-route-id="@item.ID">Edit</a>
-                @:|
-                <a asp-controller="Comments" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            }
+                @*Show the user who created the comment as well as when the comment was created or last edited.*@
+                <h5>
+                    @Html.DisplayFor(modelItem => item.User.UserName)
+                    @if (item.Edited && !item.Deleted)
+                    {
+                        @:- EDITED @Html.DisplayFor(modelItem => item.EditDate) UTC
+                    }
+                    else
+                    {
+                        @:- CREATED @Html.DisplayFor(modelItem => item.CreateDate) UTC
+                    }
+                </h5>
+
+                @*If user is an authorized editor, show links to allow them to modify the comment.*@
+                @if (ViewData.Keys.Contains("UserID") && ViewData["UserID"].ToString() == item.UserID)
+                {
+                    @if (!item.Deleted)
+                    {
+                        <a asp-controller="Comments" asp-action="Edit" asp-route-id="@item.ID">Edit</a>
+                        @:|
+                        <a asp-controller="Comments" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                    }
+                }
+                @*If user is authenticated, allow them to post replies to the comment.*@
+                @if (User.Identity.IsAuthenticated && ViewData.Keys.Contains("WorkID"))
+                {
+                    @await Html.PartialAsync("/Views/Comments/_Create.cshtml", new Comment(), replyData)
+                }
+                @*If the comment has replies, show them.*@
+                @if (item.Replies.Count > 0)
+                {
+                    @await Html.PartialAsync("/Views/Comments/_Index.cshtml", item.Replies, replyData)
+                }
+            </li>
         }
-    </div>
     }
-</div>
+</ul>

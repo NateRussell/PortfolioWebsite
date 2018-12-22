@@ -26,7 +26,7 @@ namespace PortfolioWebsite.Controllers
         public async Task<IActionResult> Index()
         {
             string userID = GetUserID();
-            var applicationDbContext = _context.Comment.Where(c => c.UserID == userID).Include(c => c.User).Include(c => c.Work);
+            var applicationDbContext = _context.Comment.Where(c => c.UserID == userID).Include(c => c.User).Include(c => c.Work).Include(c => c.Replies);
             ViewData["UserID"] = userID;
             return View(await applicationDbContext.ToListAsync());
         }
@@ -37,7 +37,7 @@ namespace PortfolioWebsite.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("ID,Text,WorkID")] Comment comment)
+        public async Task<IActionResult> Create([Bind("Text,WorkID,ParentID")] Comment comment)
         {
             string userID = GetUserID();
             if (userID != "")
