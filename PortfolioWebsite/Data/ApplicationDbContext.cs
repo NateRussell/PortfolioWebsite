@@ -17,11 +17,7 @@ namespace PortfolioWebsite.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            /*
-            modelBuilder.Entity<Comment>()
-                .Property(c => c.ID)
-                .ValueGeneratedOnAdd();
-                */
+
             modelBuilder.Entity<Comment>()
                 .HasMany(p => p.Replies)
                 .WithOne(b => b.Parent)

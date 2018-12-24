@@ -42,5 +42,10 @@ namespace PortfolioWebsite.Models
         [ForeignKey("User")]
         public string UserID { get; set; }
         public AppUser User { get; set; }
+
+        public bool ValidateAsEditor()
+        {
+            return true;
+        }
     }
 }

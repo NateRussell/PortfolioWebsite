@@ -7,8 +7,15 @@ using Microsoft.AspNetCore.Identity;
 
 namespace PortfolioWebsite.Models
 {
+    public static class Roles
+    {
+        public const string USER = "User";
+        public const string ADMIN = "Admin";
+    }
+
     public class AppUser : IdentityUser
     {
+        
         [Required]
         public bool OptIn { get; set; }
         public IList<Comment> Comments { get; set; }

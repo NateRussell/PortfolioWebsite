@@ -13,6 +13,7 @@ using PortfolioWebsite.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PortfolioWebsite.Models;
+using PortfolioWebsite.Models.SeedData;
 
 namespace PortfolioWebsite
 {
@@ -38,14 +39,14 @@ namespace PortfolioWebsite
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<AppUser>()
+            services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             if (env.IsDevelopment())
             {
@@ -63,6 +64,7 @@ namespace PortfolioWebsite
             app.UseCookiePolicy();
 
             app.UseAuthentication();
+            SeedUser.Initialize(userManager, roleManager);
 
             app.UseMvc(routes =>
             {
