@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ namespace PortfolioWebsite.Controllers
         }
 
         // GET: Works
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.Work.Include(w => w.User);
@@ -27,6 +29,7 @@ namespace PortfolioWebsite.Controllers
         }
 
         // GET: Works/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -45,7 +48,6 @@ namespace PortfolioWebsite.Controllers
             {
                 return NotFound();
             }
-            ViewData["UserID"] = GetUserID();
             return View(work);
         }
 

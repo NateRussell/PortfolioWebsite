@@ -27,16 +27,17 @@ namespace PortfolioWebsite.Models.SeedData
         {
             if (userManager.FindByNameAsync(userName).Result == null)
             {
+                string email = string.Format("{0}@test.com", userName);
                 AppUser user = new AppUser
                 {
-                    UserName = userName,
-                    Email = string.Format("{0}@test.com", userName)
+                    UserName = email,
+                    Email = email
                 };
                 IdentityResult result = userManager.CreateAsync(user, TEST_PASSWORD).Result;
 
                 if (result.Succeeded)
                 {
-                    result  = userManager.AddToRoleAsync(user, role).Result;
+                    userManager.AddToRoleAsync(user, role).Wait();
                 }
             }
         }
@@ -55,7 +56,7 @@ namespace PortfolioWebsite.Models.SeedData
                 {
                     Name = role
                 };
-                IdentityResult result = roleManager.CreateAsync(identityRole).Result;
+                roleManager.CreateAsync(identityRole).Wait();
             }
         }
 

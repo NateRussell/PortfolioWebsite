@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace PortfolioWebsite.Models
@@ -43,9 +44,17 @@ namespace PortfolioWebsite.Models
         public string UserID { get; set; }
         public AppUser User { get; set; }
 
-        public bool ValidateAsEditor()
+        public bool ValidateAsEditor(ClaimsPrincipal user)
         {
-            return true;
+            Claim userID = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userID != null)
+            {
+                return userID.Value == UserID || user.IsInRole(Roles.ADMIN);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

@@ -49,7 +49,7 @@
                 </h5>
 
                 @*If user is an authorized editor, show links to allow them to modify the comment.*@
-                @if (ViewData.Keys.Contains("UserID") && ViewData["UserID"].ToString() == item.UserID)
+                @if (item.ValidateAsEditor(User))
                 {
                     @if (!item.Deleted)
                     {

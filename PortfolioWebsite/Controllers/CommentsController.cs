@@ -22,12 +22,10 @@ namespace PortfolioWebsite.Controllers
         }
 
         // GET: Comments
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             string userID = GetUserID();
             var applicationDbContext = _context.Comment.Where(c => c.UserID == userID).Include(c => c.User).Include(c => c.Work).Include(c => c.Replies);
-            ViewData["UserID"] = userID;
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -36,7 +34,6 @@ namespace PortfolioWebsite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
         public async Task<IActionResult> Create([Bind("Text,WorkID,ParentID")] Comment comment)
         {
             string userID = GetUserID();
@@ -57,7 +54,6 @@ namespace PortfolioWebsite.Controllers
         }
 
         // GET: Comments/Edit/5
-        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -71,7 +67,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (IsValidEditor(comment))
+            if (comment.ValidateAsEditor(User))
             {
                 return View(comment);
             }
@@ -86,7 +82,6 @@ namespace PortfolioWebsite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
         public async Task<IActionResult> Edit(int id, string Text)
         {
             var comment = await _context.Comment.FindAsync(id);
@@ -95,7 +90,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (IsValidEditor(comment))
+            if (comment.ValidateAsEditor(User))
             {
                 comment.Text = Text;
                 comment.Edited = true;
@@ -144,7 +139,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (IsValidEditor(comment))
+            if (comment.ValidateAsEditor(User))
             {
                 return View(comment);
             }
@@ -157,7 +152,6 @@ namespace PortfolioWebsite.Controllers
         // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var comment = await _context.Comment.FindAsync(id);
@@ -166,7 +160,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (IsValidEditor(comment))
+            if (comment.ValidateAsEditor(User))
             {
                 comment.Deleted = true;
                 TryValidateModel(comment);
@@ -203,11 +197,6 @@ namespace PortfolioWebsite.Controllers
         private bool CommentExists(int id)
         {
             return _context.Comment.Any(e => e.ID == id);
-        }
-
-        private bool IsValidEditor(Comment comment)
-        {
-            return GetUserID() == comment.UserID;
         }
     }
 }
