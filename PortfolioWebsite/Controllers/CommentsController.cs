@@ -15,10 +15,12 @@ namespace PortfolioWebsite.Controllers
     public class CommentsController : AppController
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuthorizationService _authorizationService;
 
-        public CommentsController(ApplicationDbContext context)
+        public CommentsController(ApplicationDbContext context, IAuthorizationService authorizationService)
         {
             _context = context;
+            _authorizationService = authorizationService;
         }
 
         // GET: Comments
@@ -67,7 +69,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (comment.ValidateAsEditor(User))
+            if (comment.IsAuthorizedEditor(User, _authorizationService))
             {
                 return View(comment);
             }
@@ -90,7 +92,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (comment.ValidateAsEditor(User))
+            if (comment.IsAuthorizedEditor(User, _authorizationService))
             {
                 comment.Text = Text;
                 comment.Edited = true;
@@ -139,7 +141,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (comment.ValidateAsEditor(User))
+            if (comment.IsAuthorizedEditor(User, _authorizationService))
             {
                 return View(comment);
             }
@@ -160,7 +162,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (comment.ValidateAsEditor(User))
+            if (comment.IsAuthorizedEditor(User, _authorizationService))
             {
                 comment.Deleted = true;
                 TryValidateModel(comment);

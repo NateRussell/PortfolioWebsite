@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -6,6 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using PortfolioWebsite.Constants;
 
 namespace PortfolioWebsite.Models
 {
@@ -44,12 +46,12 @@ namespace PortfolioWebsite.Models
         public string UserID { get; set; }
         public AppUser User { get; set; }
 
-        public bool ValidateAsEditor(ClaimsPrincipal user)
+        public bool IsAuthorizedEditor(ClaimsPrincipal user, IAuthorizationService authorizationService)
         {
             Claim userID = user.FindFirst(ClaimTypes.NameIdentifier);
             if (userID != null)
             {
-                return userID.Value == UserID || user.IsInRole(Roles.ADMIN);
+                return userID.Value == UserID || authorizationService.AuthorizeAsync(user, Policies.IS_ADMIN).Result.Succeeded;
             }
             else
             {

@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PortfolioWebsite.Models;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using PortfolioWebsite.Constants;
 
 namespace PortfolioWebsite.Models.SeedData
 {
@@ -18,12 +20,12 @@ namespace PortfolioWebsite.Models.SeedData
 
         public static void SeedTestUsers(UserManager<AppUser> userManager)
         {
-            CreateTestUser(userManager, "UserA", Roles.ADMIN);
-            CreateTestUser(userManager, "UserB", Roles.USER);
-            CreateTestUser(userManager, "UserC", Roles.USER);
+            CreateTestUser(userManager, "UserA", new Claim[] { new Claim(Roles.CLAIM_ID, Roles.ADMIN) });
+            CreateTestUser(userManager, "UserB", new Claim[] { new Claim(Roles.CLAIM_ID, Roles.USER) });
+            CreateTestUser(userManager, "UserC", new Claim[] { new Claim(Roles.CLAIM_ID, Roles.USER) });
         }
 
-        private static void CreateTestUser(UserManager<AppUser> userManager, string userName, string role)
+        private static void CreateTestUser(UserManager<AppUser> userManager, string userName, Claim[] claims)
         {
             if (userManager.FindByNameAsync(userName).Result == null)
             {
@@ -37,34 +39,16 @@ namespace PortfolioWebsite.Models.SeedData
 
                 if (result.Succeeded)
                 {
-                    userManager.AddToRoleAsync(user, role).Wait();
+                    if (claims != null)
+                    {
+                        userManager.AddClaimsAsync(user, claims).Wait();
+                    }
                 }
             }
         }
 
-        public static void SeedRoles(RoleManager<IdentityRole> roleManager)
+        public static void Initialize(UserManager<AppUser> userManager)
         {
-            CreateRole(roleManager, Roles.USER);
-            CreateRole(roleManager, Roles.ADMIN);
-        }
-
-        private static void CreateRole(RoleManager<IdentityRole> roleManager, string role)
-        {
-            if ( !roleManager.RoleExistsAsync(role).Result)
-            {
-                IdentityRole identityRole = new IdentityRole
-                {
-                    Name = role
-                };
-                roleManager.CreateAsync(identityRole).Wait();
-            }
-        }
-
-        public static void Initialize(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
-        {
-            
-            SeedRoles(roleManager); //Roles must be seeded first to be attached to a user.
-
             #if DEBUG
                 SeedTestUsers(userManager);
             #endif

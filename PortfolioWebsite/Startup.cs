@@ -16,6 +16,7 @@ using PortfolioWebsite.Models;
 using PortfolioWebsite.Models.SeedData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using PortfolioWebsite.Constants;
 
 namespace PortfolioWebsite
 {
@@ -41,26 +42,23 @@ namespace PortfolioWebsite
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<AppUser>().AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddDefaultIdentity<AppUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services.AddAuthorization(options => { new PolicyConfiguration(options); });
+
+            //Require authentication on all routes by default
             services.AddMvc(config => 
             {
-                // using Microsoft.AspNetCore.Mvc.Authorization;
-                // using Microsoft.AspNetCore.Authorization;
-                var policy = new AuthorizationPolicyBuilder()
+                AuthorizationPolicy policy = new AuthorizationPolicyBuilder()
                                  .RequireAuthenticatedUser()
                                  .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            // Add Role claims to the User object
-            // See: https://github.com/aspnet/Identity/issues/1813#issuecomment-420066501
-            services.AddScoped<IUserClaimsPrincipalFactory<AppUser>, UserClaimsPrincipalFactory<AppUser, IdentityRole>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, UserManager<AppUser> userManager)
         {
             if (env.IsDevelopment())
             {
@@ -78,7 +76,7 @@ namespace PortfolioWebsite
             app.UseCookiePolicy();
 
             app.UseAuthentication();
-            SeedUser.Initialize(userManager, roleManager);
+            SeedUser.Initialize(userManager);
 
             app.UseMvc(routes =>
             {

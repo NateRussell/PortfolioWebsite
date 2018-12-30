@@ -1,5 +1,7 @@
 ﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
 @model IEnumerable<PortfolioWebsite.Models.Comment>
+@inject IAuthorizationService AuthorizationService
 
 <ul class="comments">
     @foreach (var item in Model.Reverse())
@@ -49,7 +51,7 @@
                 </h5>
 
                 @*If user is an authorized editor, show links to allow them to modify the comment.*@
-                @if (item.ValidateAsEditor(User))
+                @if (item.IsAuthorizedEditor(User, AuthorizationService))
                 {
                     @if (!item.Deleted)
                     {
