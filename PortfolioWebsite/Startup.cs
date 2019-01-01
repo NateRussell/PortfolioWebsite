@@ -43,9 +43,7 @@ namespace PortfolioWebsite
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<AppUser>().AddEntityFrameworkStores<ApplicationDbContext>();
-
-            services.AddAuthorization(options => { new PolicyConfiguration(options); });
-
+            
             //Require authentication on all routes by default
             services.AddMvc(config => 
             {
@@ -55,6 +53,8 @@ namespace PortfolioWebsite
                 config.Filters.Add(new AuthorizeFilter(policy));
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            //Add policies
+            services.AddAuthorization(options => { new PolicyConfiguration(options); });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
