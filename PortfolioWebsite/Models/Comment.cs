@@ -21,11 +21,12 @@ namespace PortfolioWebsite.Models
         [StringLength(1000)]
         public string Text { get; set; }
 
-        public bool Deleted { get; set; } = false;
         public bool Edited { get; set; } = false;
+        public bool Deleted { get; set; } = false;
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow;
         public DateTime EditDate { get; set; }
+        public DateTime DeleteDate { get; set; }
 
         public IList<Comment> Replies { get; set; }
 
@@ -57,6 +58,11 @@ namespace PortfolioWebsite.Models
             {
                 return false;
             }
+        }
+
+        public bool IsRoot()
+        {
+            return ParentID == null;
         }
     }
 }

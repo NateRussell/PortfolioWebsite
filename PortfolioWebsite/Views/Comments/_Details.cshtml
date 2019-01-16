@@ -1,0 +1,44 @@
+﻿@model PortfolioWebsite.Models.Comment
+@using Microsoft.AspNetCore.Authorization
+@using PortfolioWebsite.Constants
+@inject IAuthorizationService AuthorizationService
+
+
+@*Show the text of the comment unless it has been deleted.*@
+@if (Model.Deleted)
+{
+    <p>[removed]</p>
+}
+else
+{
+    <p>@Html.DisplayFor(model => model.Text)</p>
+}
+
+@*Show the user who created the comment as well as when the comment was created or last edited.*@
+    <h5>
+        @Html.DisplayFor(model => model.User.UserName)
+         - CREATED @Html.DisplayFor(model => model.CreateDate) UTC
+        @if (Model.Edited)
+        {
+        @:- EDITED @Html.DisplayFor(model => model.EditDate) UTC
+        }
+        @if (Model.Deleted)
+        {
+            @:- DELETED @Html.DisplayFor(model => model.DeleteDate) UTC
+        }
+    </h5>
+
+@*If user is an authorized editor, show links to allow them to modify the comment.*@
+@if (Model.IsAuthorizedEditor(User, AuthorizationService))
+{
+    @if (!Model.Deleted)
+    {
+        <form asp-controller="Comments" asp-action="Edit" asp-route-id="@Model.ID">
+            <input type="submit" value="Edit" class="btn btn-default" />
+        </form>
+        <form asp-controller="Comments" asp-action="Delete" method="get" asp-route-id="@Model.ID" data-ajax="true" data-ajax-method="post" data-ajax-url="@Url.Action("Delete", "Comments", new { id = Model.ID, response = ResponseTypes.AJAX})" data-ajax-update="#Comment_@Model.ID" data-ajax-confirm="Are you sure you want to delete this comment?">
+            @Html.AntiForgeryToken()
+            <input type="submit" value="Delete" class="btn btn-default" />
+        </form>
+    }
+}

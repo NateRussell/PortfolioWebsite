@@ -11,10 +11,20 @@ namespace PortfolioWebsite.Controllers
     {
         protected string GetUserID()
         {
-            Claim userID = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userID != null)
+            return GetUserData(ClaimTypes.NameIdentifier);
+        }
+
+        protected string GetUserName()
+        {
+            return GetUserData(ClaimTypes.Name);
+        }
+
+        protected string GetUserData(string claimType)
+        {
+            Claim userData = User.FindFirst(claimType);
+            if (userData != null)
             {
-                return userID.Value;
+                return userData.Value;
             }
             else
             {

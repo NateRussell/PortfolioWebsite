@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PortfolioWebsite.Data;
 using PortfolioWebsite.Models;
+using PortfolioWebsite.Constants;
 
 namespace PortfolioWebsite.Controllers
 {
@@ -36,7 +37,7 @@ namespace PortfolioWebsite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Text,WorkID,ParentID")] Comment comment)
+        public async Task<IActionResult> Create([Bind("Text,WorkID,ParentID")] Comment comment, string response = "")
         {
             string userID = GetUserID();
             if (userID != "")
@@ -50,7 +51,16 @@ namespace PortfolioWebsite.Controllers
             {
                 _context.Add(comment);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+
+                if (response == ResponseTypes.AJAX)
+                {
+                    _context.Entry(comment).Reference(c => c.User).Load();
+                    return PartialView("_Index", new List<Comment> { comment });
+                }
+                else
+                {
+                    return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+                }
             }
             return BadRequest(ModelState);
         }
@@ -154,7 +164,7 @@ namespace PortfolioWebsite.Controllers
         // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string response = "")
         {
             var comment = await _context.Comment.FindAsync(id);
             if (comment == null)
@@ -165,6 +175,7 @@ namespace PortfolioWebsite.Controllers
             if (comment.IsAuthorizedEditor(User, _authorizationService))
             {
                 comment.Deleted = true;
+                comment.DeleteDate = DateTime.UtcNow;
                 TryValidateModel(comment);
             }
             else
@@ -190,7 +201,15 @@ namespace PortfolioWebsite.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+                if (response == ResponseTypes.AJAX)
+                {
+                    _context.Entry(comment).Reference(c => c.User).Load();
+                    return PartialView("_Details", comment);
+                }
+                else
+                {
+                    return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+                }
             }
             return BadRequest();
 
