@@ -39,13 +39,19 @@ namespace PortfolioWebsite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Text,WorkID,ParentID")] Comment comment, string response = "")
         {
+            ModelState.Clear();
+            if (comment.WorkID == 0 && comment.ParentID != null)
+            {
+                Comment parentComment = await _context.Comment.FindAsync(comment.ParentID);
+                comment.WorkID = parentComment.WorkID;
+            }
+            
             string userID = GetUserID();
             if (userID != "")
             {
-                ModelState.Clear();
                 comment.UserID = userID;
-                TryValidateModel(comment);
             }
+            TryValidateModel(comment);
 
             if (ModelState.IsValid)
             {
@@ -65,14 +71,23 @@ namespace PortfolioWebsite.Controllers
             return BadRequest(ModelState);
         }
 
-        // GET: Comments/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Works/Reply
+        public IActionResult Reply(int id, string response = "")
         {
-            if (id == null)
+            ViewData["ParentID"] = id;
+            if (response == ResponseTypes.AJAX)
             {
-                return NotFound();
+                return PartialView("_Create", new Comment());
             }
+            else
+            {
+                return View();
+            }
+        }
 
+        // GET: Comments/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
             var comment = await _context.Comment.FindAsync(id);
             if (comment == null)
             {

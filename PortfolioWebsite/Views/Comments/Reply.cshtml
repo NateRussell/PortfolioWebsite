@@ -1,0 +1,13 @@
+﻿@model PortfolioWebsite.Models.Comment
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2>Reply</h2>
+
+@await Html.PartialAsync("/Views/Comments/_Create.cshtml", new Comment())
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -18,14 +18,6 @@
     <div id="Comment_@item.ID">
         @await Html.PartialAsync("/Views/Comments/_Details.cshtml", item)
     </div>
-
-    @*If user is authenticated, allow them to post replies to the comment.*@
-    @if (User.Identity.IsAuthenticated)
-    {
-        ViewDataDictionary replyData = new ViewDataDictionary(ViewData);
-        replyData.Add("ParentID", item.ID);
-        @await Html.PartialAsync("/Views/Comments/_Create.cshtml", new Comment(), replyData);
-    }
     @*If the comment has replies, show them.*@
     <ul id="Replies_For_Comment_@item.ID">
         @if (item.Replies != null && item.Replies.Count > 0)

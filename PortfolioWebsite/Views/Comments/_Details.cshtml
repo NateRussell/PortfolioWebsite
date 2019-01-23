@@ -3,7 +3,6 @@
 @using PortfolioWebsite.Constants
 @inject IAuthorizationService AuthorizationService
 
-
 @*Show the text of the comment unless it has been deleted.*@
 @if (Model.Deleted)
 {
@@ -15,18 +14,18 @@ else
 }
 
 @*Show the user who created the comment as well as when the comment was created or last edited.*@
-    <h5>
-        @Html.DisplayFor(model => model.User.UserName)
-         - CREATED @Html.DisplayFor(model => model.CreateDate) UTC
-        @if (Model.Edited)
-        {
+<h5>
+    @Html.DisplayFor(model => model.User.UserName)
+    - CREATED @Html.DisplayFor(model => model.CreateDate) UTC
+    @if (Model.Edited)
+    {
         @:- EDITED @Html.DisplayFor(model => model.EditDate) UTC
-        }
-        @if (Model.Deleted)
-        {
-            @:- DELETED @Html.DisplayFor(model => model.DeleteDate) UTC
-        }
-    </h5>
+    }
+    @if (Model.Deleted)
+    {
+        @:- DELETED @Html.DisplayFor(model => model.DeleteDate) UTC
+    }
+</h5>
 
 @*If user is an authorized editor, show links to allow them to modify the comment.*@
 @if (Model.IsAuthorizedEditor(User, AuthorizationService))
@@ -40,5 +39,13 @@ else
             @Html.AntiForgeryToken()
             <input type="submit" value="Delete" class="btn btn-default" />
         </form>
+    }
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div id="Reply_For_Comment_@Model.ID">
+            <form asp-controller="Comments" asp-action="Reply" asp-route-id="@Model.ID" data-ajax="true" data-ajax-method="get" data-ajax-url="@Url.Action("Reply", "Comments", new { id = Model.ID, response = ResponseTypes.AJAX})" data-ajax-update="#Reply_For_Comment_@Model.ID">
+                <input type="submit" value="Reply" class="btn btn-default" />
+            </form>
+        </div>
     }
 }
