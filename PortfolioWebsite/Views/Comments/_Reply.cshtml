@@ -1,0 +1,9 @@
+﻿@using PortfolioWebsite.Constants
+
+@model PortfolioWebsite.Models.Comment
+
+<form method="post" asp-controller="Comments" asp-action="Create" data-ajax="true" data-ajax-url="@Url.Action("Create", "Comments", new { response = ResponseTypes.AJAX })" data-ajax-update="#Replies_For_Comment_@Model.ParentID" data-ajax-mode="before">
+    @await Html.PartialAsync("/Views/Comments/_Form.cshtml", Model)
+    <input type="submit" value="Reply" class="btn btn-default" />
+</form>
+

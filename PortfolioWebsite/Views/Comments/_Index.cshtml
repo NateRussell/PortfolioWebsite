@@ -18,6 +18,10 @@
     <div id="Comment_@item.ID">
         @await Html.PartialAsync("/Views/Comments/_Details.cshtml", item)
     </div>
+    <div id="Controls_For_Comment_@item.ID">
+        @await Html.PartialAsync("/Views/Comments/_Controls.cshtml", item)
+    </div>
+
     @*If the comment has replies, show them.*@
     <ul id="Replies_For_Comment_@item.ID">
         @if (item.Replies != null && item.Replies.Count > 0)

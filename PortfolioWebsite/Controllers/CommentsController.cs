@@ -40,12 +40,14 @@ namespace PortfolioWebsite.Controllers
         public async Task<IActionResult> Create([Bind("Text,WorkID,ParentID")] Comment comment, string response = "")
         {
             ModelState.Clear();
-            if (comment.WorkID == 0 && comment.ParentID != null)
+            if (comment.ParentID != null)
             {
                 Comment parentComment = await _context.Comment.FindAsync(comment.ParentID);
-                comment.WorkID = parentComment.WorkID;
+                if (parentComment != null)
+                {
+                    comment.WorkID = parentComment.WorkID;
+                }
             }
-            
             string userID = GetUserID();
             if (userID != "")
             {
@@ -58,30 +60,31 @@ namespace PortfolioWebsite.Controllers
                 _context.Add(comment);
                 await _context.SaveChangesAsync();
 
-                if (response == ResponseTypes.AJAX)
+                switch (response)
                 {
-                    _context.Entry(comment).Reference(c => c.User).Load();
-                    return PartialView("_Index", new List<Comment> { comment });
-                }
-                else
-                {
-                    return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+                    case ResponseTypes.AJAX:
+                        _context.Entry(comment).Reference(c => c.User).Load();
+                        return PartialView("_Index", new List<Comment> { comment });
+                    case ResponseTypes.JSON:
+                        return Json(comment);
+                    default:
+                        return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
                 }
             }
             return BadRequest(ModelState);
         }
 
-        // GET: Works/Reply
-        public IActionResult Reply(int id, string response = "")
+        // GET: Comments/Reply
+        public async Task<IActionResult> Reply(int id, string response = "")
         {
-            ViewData["ParentID"] = id;
-            if (response == ResponseTypes.AJAX)
+            Comment replyComment = new Comment() { ParentID = id };
+            switch (response)
             {
-                return PartialView("_Create", new Comment());
-            }
-            else
-            {
-                return View();
+                case ResponseTypes.AJAX:
+                    return PartialView("_Reply", replyComment);
+                default:
+                    replyComment.Parent = await _context.Comment.FindAsync(replyComment.ParentID);
+                    return View(replyComment);
             }
         }
 
@@ -216,14 +219,15 @@ namespace PortfolioWebsite.Controllers
                         throw;
                     }
                 }
-                if (response == ResponseTypes.AJAX)
+                switch (response)
                 {
-                    _context.Entry(comment).Reference(c => c.User).Load();
-                    return PartialView("_Details", comment);
-                }
-                else
-                {
-                    return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
+                    case ResponseTypes.AJAX:
+                        _context.Entry(comment).Reference(c => c.User).Load();
+                        return PartialView("_Details", comment);
+                    case ResponseTypes.JSON:
+                        return Json(comment);
+                    default:
+                        return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
                 }
             }
             return BadRequest();

@@ -1,0 +1,11 @@
+<environment include="Development">
+    <script src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://unpkg.com/jquery-ajax-unobtrusive@3.2.6/dist/jquery.unobtrusive-ajax.min.js"
+            asp-fallback-src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.validator.unobtrusive"
+            crossorigin="anonymous"
+            integrity="sha384-hpW2z+6vt5klZGNoKgrK+fGNDXlKaaJTq0+GMJNW2RstoJI9gyy8vpNl7rOH8MLF">
+    </script>
+</environment>

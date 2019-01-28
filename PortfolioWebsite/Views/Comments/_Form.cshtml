@@ -1,0 +1,8 @@
+﻿@model PortfolioWebsite.Models.Comment
+
+<div class="form-group">
+    <input asp-for="Text" id="NewText" class="form-control" />
+    <span asp-validation-for="Text" class="text-danger"></span>
+</div>
+<input asp-for="WorkID" class="form-control" asp-items="ViewBag.WorkID" />
+<input asp-for="ParentID" class="form-control" asp-items="ViewBag.ParentID" />

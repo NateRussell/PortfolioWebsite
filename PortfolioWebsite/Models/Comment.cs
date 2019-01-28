@@ -19,7 +19,24 @@ namespace PortfolioWebsite.Models
 
         [Required]
         [StringLength(1000)]
-        public string Text { get; set; }
+        public string Text {
+            get
+            {
+                if (Deleted)
+                {
+                    return "[removed]";
+                }
+                else
+                {
+                    return pText;
+                }
+            }
+            set
+            {
+                pText = value;
+            }
+        }
+        private string pText;
 
         public bool Edited { get; set; } = false;
         public bool Deleted { get; set; } = false;

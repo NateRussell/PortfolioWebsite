@@ -11,11 +11,11 @@
     }
 
 }
-<h2>Comments (@commentCount) </h2>
+<h2>Comments</h2>
 @if (User.Identity.IsAuthenticated && ViewData.Keys.Contains("WorkID")) //Add Authorization
 {
     <div id="Create_Comment">
-        @await Html.PartialAsync("/Views/Comments/_Create.cshtml", new Comment())
+        @await Html.PartialAsync("/Views/Comments/_Create.cshtml", new Comment() { WorkID = (int)ViewData["WorkID"] })
     </div>
 }
 @if (commentCount > 0)
@@ -24,3 +24,5 @@
         @await Html.PartialAsync("/Views/Comments/_Index.cshtml", Model.Where(c => c.IsRoot()))
     </ul>
 }
+
+

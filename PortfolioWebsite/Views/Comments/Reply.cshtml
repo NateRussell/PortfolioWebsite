@@ -6,7 +6,8 @@
 
 <h2>Reply</h2>
 
-@await Html.PartialAsync("/Views/Comments/_Create.cshtml", new Comment())
+@await Html.PartialAsync("/Views/Comments/_Details.cshtml", Model.Parent)
+@await Html.PartialAsync("/Views/Comments/_Reply.cshtml", Model)
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

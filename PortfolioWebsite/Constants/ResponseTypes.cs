@@ -8,5 +8,6 @@ namespace PortfolioWebsite.Constants
     public static class ResponseTypes
     {
         public const string AJAX = "AJAX";
+        public const string JSON = "JSON";
     }
 }
