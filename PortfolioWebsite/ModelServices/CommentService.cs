@@ -10,19 +10,23 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc;
+using PortfolioWebsite.ModelAuthorizationServices;
 
 namespace PortfolioWebsite.ModelServices
 {
     public class CommentService : ModelService , ICommentService
     {
+        public ICommentAuthorizationService Authorization { get; private set; }
+
         public CommentService(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            IObjectModelValidator modelValidator
+            IObjectModelValidator modelValidator,
+            ICommentAuthorizationService commentViewService
             )
-            :base(context, authorizationService, modelValidator)
+            :base(context, modelValidator)
         {
-
+            Authorization = commentViewService;
         }
 
         public async Task<IModelServiceResponse<Comment>> Create(ActionContext actionContext, Comment comment)
@@ -110,7 +114,7 @@ namespace PortfolioWebsite.ModelServices
 
         private async Task<IModelServiceResponse<Comment>> Update(ActionContext actionContext, Comment comment)
         {
-            if (!comment.IsAuthorizedEditor(actionContext.HttpContext.User, _authorizationService))
+            if (Authorization.IsAuthorizedEditor(comment, actionContext.HttpContext.User))
             {
                 return new ModelServiceResponse<Comment>(comment, null, HttpStatusCode.Unauthorized);
             }

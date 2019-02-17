@@ -1,9 +1,11 @@
-﻿@model PortfolioWebsite.Models.Comment
-@using Microsoft.AspNetCore.Authorization
+﻿@using PortfolioWebsite.ModelAuthorizationServices;
 @using PortfolioWebsite.Constants
-@inject IAuthorizationService AuthorizationService
+@inject ICommentAuthorizationService authorization
+
+@model PortfolioWebsite.Models.Comment
+
 @*If user is an authorized editor, show links to allow them to modify the comment.*@
-@if (Model.IsAuthorizedEditor(User, AuthorizationService))
+@if (authorization.IsAuthorizedEditor(Model, User))
 {
     @if (!Model.Deleted)
     {

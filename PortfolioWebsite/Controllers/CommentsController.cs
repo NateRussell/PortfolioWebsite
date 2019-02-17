@@ -18,13 +18,11 @@ namespace PortfolioWebsite.Controllers
     public class CommentsController : AppController<Comment>
     {
         private readonly ApplicationDbContext _context;
-        private readonly IAuthorizationService _authorizationService;
         private readonly ICommentService _commentService;
 
-        public CommentsController(ApplicationDbContext context, IAuthorizationService authorizationService, ICommentService commentService)
+        public CommentsController(ApplicationDbContext context, ICommentService commentService)
         {
             _context = context;
-            _authorizationService = authorizationService;
             _commentService = commentService;
             SetResponses();
         }
@@ -100,7 +98,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (comment.IsAuthorizedEditor(User, _authorizationService))
+            if (_commentService.Authorization.IsAuthorizedEditor(comment, User))
             {
                 return View(comment);
             }
@@ -135,7 +133,7 @@ namespace PortfolioWebsite.Controllers
                 return NotFound();
             }
 
-            if (comment.IsAuthorizedEditor(User, _authorizationService))
+            if (_commentService.Authorization.IsAuthorizedEditor(comment, User))
             {
                 return View(comment);
             }

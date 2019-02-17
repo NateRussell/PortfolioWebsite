@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using PortfolioWebsite.Constants;
 using PortfolioWebsite.ModelServices;
+using PortfolioWebsite.ModelAuthorizationServices;
 
 namespace PortfolioWebsite
 {
@@ -56,6 +57,9 @@ namespace PortfolioWebsite
 
             //Add policies
             services.AddAuthorization(options => { new PolicyConfiguration(options); });
+
+            //Add Model Authorization Services
+            services.AddScoped<ICommentAuthorizationService, CommentAuthorizationService>();
 
             //Add Model Services
             services.AddScoped<ICommentService, CommentService>();

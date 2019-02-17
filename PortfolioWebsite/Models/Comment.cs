@@ -64,20 +64,6 @@ namespace PortfolioWebsite.Models
         public string UserID { get; set; }
         public AppUser User { get; set; }
 
-
-        public bool IsAuthorizedEditor(ClaimsPrincipal user, IAuthorizationService authorizationService)
-        {
-            Claim userID = user.FindFirst(ClaimTypes.NameIdentifier);
-            if (userID != null)
-            {
-                return userID.Value == UserID || authorizationService.AuthorizeAsync(user, Policies.IS_ADMIN).Result.Succeeded;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         public bool IsRoot()
         {
             return ParentID == null;

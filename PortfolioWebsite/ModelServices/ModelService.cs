@@ -14,17 +14,14 @@ namespace PortfolioWebsite.ModelServices
     public class ModelService : IModelService
     {
         protected readonly ApplicationDbContext _context;
-        protected readonly IAuthorizationService _authorizationService;
         protected readonly IObjectModelValidator _modelValidator;
 
         public ModelService(
             ApplicationDbContext context,
-            IAuthorizationService authorizationService,
             IObjectModelValidator modelValidator
             )
         {
             _context = context;
-            _authorizationService = authorizationService;
             _modelValidator = modelValidator;
         }
 
