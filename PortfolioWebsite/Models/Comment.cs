@@ -11,7 +11,7 @@ using PortfolioWebsite.Constants;
 
 namespace PortfolioWebsite.Models
 {
-    public class Comment
+    public class Comment : Model
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -64,6 +64,7 @@ namespace PortfolioWebsite.Models
         public string UserID { get; set; }
         public AppUser User { get; set; }
 
+
         public bool IsAuthorizedEditor(ClaimsPrincipal user, IAuthorizationService authorizationService)
         {
             Claim userID = user.FindFirst(ClaimTypes.NameIdentifier);
@@ -80,6 +81,11 @@ namespace PortfolioWebsite.Models
         public bool IsRoot()
         {
             return ParentID == null;
+        }
+
+        new public Comment Clone()
+        {
+            return (Comment)base.Clone();
         }
     }
 }

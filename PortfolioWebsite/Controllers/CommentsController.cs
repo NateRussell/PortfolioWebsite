@@ -10,18 +10,43 @@ using Microsoft.EntityFrameworkCore;
 using PortfolioWebsite.Data;
 using PortfolioWebsite.Models;
 using PortfolioWebsite.Constants;
+using PortfolioWebsite.ModelServices;
+using System.Net;
 
 namespace PortfolioWebsite.Controllers
 {
-    public class CommentsController : AppController
+    public class CommentsController : AppController<Comment>
     {
         private readonly ApplicationDbContext _context;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ICommentService _commentService;
 
-        public CommentsController(ApplicationDbContext context, IAuthorizationService authorizationService)
+        public CommentsController(ApplicationDbContext context, IAuthorizationService authorizationService, ICommentService commentService)
         {
             _context = context;
             _authorizationService = authorizationService;
+            _commentService = commentService;
+            SetResponses();
+        }
+
+        private void SetResponses()
+        {
+            //View Responses
+            _responder.Default = (modelServiceResponse) => RedirectToAction(nameof(WorksController.Details), "Works", new { id = modelServiceResponse.Model.WorkID });
+
+            //JSON Responses
+            _JSONresponder.Default = (modelServiceResponse) => Json(modelServiceResponse.Model);
+            _JSONresponder[HttpStatusCode.Unauthorized] = (modelServiceResponse) => Unauthorized();
+            _JSONresponder[HttpStatusCode.BadRequest] = (modelServiceResponse) => BadRequest(modelServiceResponse.ValidationState);
+            _JSONresponder[HttpStatusCode.NotFound] = (modelServiceResponse) => NotFound();
+            
+            //AJAX Responses
+            _AJAXresponder[HttpStatusCode.OK, HttpStatusCode.Created] = modelServiceResponse => {
+                _context.Entry(modelServiceResponse.Model).Reference(c => c.User).Load();
+                return PartialView("_Index", new List<Comment> { modelServiceResponse.Model });
+            };
+            _AJAXresponder[HttpStatusCode.Unauthorized] = _JSONresponder[HttpStatusCode.Unauthorized];
+            _AJAXresponder[HttpStatusCode.NotFound] = _JSONresponder[HttpStatusCode.NotFound];
         }
 
         // GET: Comments
@@ -37,41 +62,10 @@ namespace PortfolioWebsite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Text,WorkID,ParentID")] Comment comment, string response = "")
+        public async Task<IActionResult> Create([Bind("Text, WorkID")] Comment comment, string response = "")
         {
-            ModelState.Clear();
-            if (comment.ParentID != null)
-            {
-                Comment parentComment = await _context.Comment.FindAsync(comment.ParentID);
-                if (parentComment != null)
-                {
-                    comment.WorkID = parentComment.WorkID;
-                }
-            }
-            string userID = GetUserID();
-            if (userID != "")
-            {
-                comment.UserID = userID;
-            }
-            TryValidateModel(comment);
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(comment);
-                await _context.SaveChangesAsync();
-
-                switch (response)
-                {
-                    case ResponseTypes.AJAX:
-                        _context.Entry(comment).Reference(c => c.User).Load();
-                        return PartialView("_Index", new List<Comment> { comment });
-                    case ResponseTypes.JSON:
-                        return Json(comment);
-                    default:
-                        return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
-                }
-            }
-            return BadRequest(ModelState);
+            IModelServiceResponse<Comment> modelServiceResponse = await _commentService.Create(ControllerContext, comment);
+            return GetResponse(modelServiceResponse, response);
         }
 
         // GET: Comments/Reply
@@ -86,6 +80,15 @@ namespace PortfolioWebsite.Controllers
                     replyComment.Parent = await _context.Comment.FindAsync(replyComment.ParentID);
                     return View(replyComment);
             }
+        }
+
+        // POST: Comments/Reply
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reply([Bind("Text, ParentID")] Comment comment, string response = "")
+        {
+            IModelServiceResponse<Comment> modelServiceResponse = await _commentService.Reply(ControllerContext, comment);
+            return GetResponse(modelServiceResponse, response);
         }
 
         // GET: Comments/Edit/5
@@ -112,47 +115,10 @@ namespace PortfolioWebsite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, string Text)
+        public async Task<IActionResult> Edit(int id, string Text, string response = "")
         {
-            var comment = await _context.Comment.FindAsync(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            if (comment.IsAuthorizedEditor(User, _authorizationService))
-            {
-                comment.Text = Text;
-                comment.Edited = true;
-                comment.EditDate = DateTime.UtcNow;
-                TryValidateModel(comment);
-            }
-            else
-            {
-                Unauthorized();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(comment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CommentExists(comment.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
-            }
-            return View(comment);
+            IModelServiceResponse<Comment> modelServiceResponse = await _commentService.Edit(ControllerContext, id, Text);
+            return GetResponse(modelServiceResponse, response);
         }
 
         // GET: Comments/Delete/5
@@ -184,53 +150,8 @@ namespace PortfolioWebsite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id, string response = "")
         {
-            var comment = await _context.Comment.FindAsync(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            if (comment.IsAuthorizedEditor(User, _authorizationService))
-            {
-                comment.Deleted = true;
-                comment.DeleteDate = DateTime.UtcNow;
-                TryValidateModel(comment);
-            }
-            else
-            {
-                return Unauthorized();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(comment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CommentExists(comment.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                switch (response)
-                {
-                    case ResponseTypes.AJAX:
-                        _context.Entry(comment).Reference(c => c.User).Load();
-                        return PartialView("_Details", comment);
-                    case ResponseTypes.JSON:
-                        return Json(comment);
-                    default:
-                        return RedirectToAction(nameof(WorksController.Details), "Works", new { id = comment.WorkID });
-                }
-            }
-            return BadRequest();
+            IModelServiceResponse<Comment> modelServiceResponse = await _commentService.Delete(ControllerContext, id);
+            return GetResponse(modelServiceResponse, response);
 
         }
 

@@ -11,7 +11,7 @@ using PortfolioWebsite.Models;
 
 namespace PortfolioWebsite.Controllers
 {
-    public class WorksController : AppController
+    public class WorksController : AppController<Work>
     {
         private readonly ApplicationDbContext _context;
 

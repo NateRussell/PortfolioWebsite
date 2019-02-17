@@ -17,6 +17,7 @@ using PortfolioWebsite.Models.SeedData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using PortfolioWebsite.Constants;
+using PortfolioWebsite.ModelServices;
 
 namespace PortfolioWebsite
 {
@@ -55,6 +56,9 @@ namespace PortfolioWebsite
 
             //Add policies
             services.AddAuthorization(options => { new PolicyConfiguration(options); });
+
+            //Add Model Services
+            services.AddScoped<ICommentService, CommentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
